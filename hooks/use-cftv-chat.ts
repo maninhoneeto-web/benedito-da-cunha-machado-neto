@@ -39,7 +39,7 @@ export function useCftvChat() {
         const ai = new GoogleGenAI({ apiKey });
         
         chatSessionRef.current = ai.chats.create({
-          model: 'gemini-3-flash-preview',
+          model: 'gemini-2.5-flash',
           config: {
             systemInstruction: `Você é o assistente virtual oficial da NDS CFTV Digital, analista sênior em segurança eletrônica e elaboração de projetos.
 
@@ -109,14 +109,22 @@ Capacidades e Diretrizes:
         )
       );
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error sending message:", error);
+      
+      let errorMessage = 'Desculpe, ocorreu um erro ao se comunicar com os servidores. Tente novamente em alguns instantes.';
+      if (error?.message?.includes('high demand') || error?.status === 429 || error?.status === 503) {
+        errorMessage = 'Nossos servidores estão enfrentando alta demanda no momento (Spike in demand). Por favor, aguarde alguns segundos e tente novamente.';
+      } else if (error?.message?.includes('API key')) {
+         errorMessage = 'Erro de configuração. Verifique se a sua chave de API está configurada corretamente nas configurações do applet.';
+      }
+
       setMessages(prev => [
         ...prev,
         { 
           id: modelMessageId, 
           role: 'model', 
-          text: 'Desculpe, ocorreu um erro ao se comunicar com os servidores. Se você enviou uma imagem/arquivo muito grande, tente enviá-lo em tamanho menor.', 
+          text: errorMessage, 
           isStreaming: false 
         }
       ]);
