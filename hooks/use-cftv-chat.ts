@@ -165,17 +165,18 @@ DIRETRIZES TOTAIS:
     } catch (error: any) {
       console.error("Error sending message:", error);
       
-      let errorMessage = 'Desculpe, ocorreu um erro ao se comunicar com os servidores. Tente novamente em alguns instantes.';
-      if (error?.message?.includes('high demand') || error?.status === 429 || error?.status === 503) {
-        errorMessage = 'Nossos servidores estão enfrentando alta demanda no momento (Spike in demand). Por favor, aguarde alguns segundos e tente novamente.';
+      let errorMessage = 'Desculpe, tive um pequeno problema técnico. Por favor, tente enviar sua mensagem novamente em alguns instantes.';
+      
+      if (error?.message?.toLowerCase().includes('demand') || error?.message?.includes('429') || error?.status === 429) {
+        errorMessage = 'Estamos com muitos acessos no momento. Por favor, aguarde uns segundos e tente novamente ou nos chame direto no WhatsApp!';
       } else if (error?.message?.includes('API key')) {
-         errorMessage = 'Erro de configuração. Verifique se a sua chave de API está configurada corretamente nas configurações do applet.';
+        errorMessage = 'Erro de configuração. Por favor, verifique sua chave de acesso (API Key).';
       }
 
       setMessages(prev => [
         ...prev,
         { 
-          id: modelMessageId, 
+          id: Date.now().toString(), 
           role: 'model', 
           text: errorMessage, 
           isStreaming: false 
