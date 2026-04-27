@@ -1,12 +1,13 @@
 'use client';
 
-import { useCftvChat, Attachment } from '@/hooks/use-cftv-chat';
+import Image from 'next/image';
 import { Camera, Send, ShieldCheck, User, Paperclip, X, Cctv } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { cn } from '@/lib/utils';
+import { useCftvChat, Attachment } from '@/hooks/use-cftv-chat';
 
 export default function Home() {
   const { messages, sendMessage, isLoading } = useCftvChat();
@@ -14,6 +15,7 @@ export default function Home() {
   const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [logoError, setLogoError] = useState(false);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -62,12 +64,23 @@ export default function Home() {
       <header className="flex items-center justify-between px-6 py-5 bg-[#0f1115] border border-slate-800 rounded-2xl shrink-0 shadow-sm relative overflow-hidden">
         <div className="flex items-center gap-4 z-10">
           <motion.div 
-            className="relative flex items-center justify-center w-12 h-12 rounded-lg bg-orange-600 text-white shadow-inner"
+            className="relative flex items-center justify-center w-12 h-12 rounded-lg bg-orange-600/10 border border-orange-500/20 shadow-inner overflow-hidden"
             whileHover={{ scale: 1.05 }}
           >
-            <Cctv className="w-6 h-6 absolute z-10" />
+            {!logoError ? (
+              <Image 
+                src="/logo.png" 
+                alt="NDS CFTV Logo" 
+                width={48} 
+                height={48}
+                className="object-contain p-1"
+                onError={() => setLogoError(true)}
+              />
+            ) : (
+              <Cctv className="w-6 h-6 text-orange-500 z-10" />
+            )}
             <motion.div 
-              className="absolute inset-0 bg-white/30"
+              className="absolute inset-0 bg-white/10"
               animate={{ 
                 opacity: [0, 0.4, 0],
                 rotate: [0, 90, 180, 270, 360]
