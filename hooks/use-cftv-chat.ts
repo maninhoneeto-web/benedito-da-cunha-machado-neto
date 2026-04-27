@@ -179,7 +179,7 @@ REGRAS:
         let errorMessage = 'Desculpe, tive um pequeno problema técnico. Por favor, tente enviar sua mensagem novamente em alguns instantes.';
         
         if (isQuotaError) {
-          errorMessage = 'Estamos com muitos acessos no momento. Para não perder tempo, você pode clicar no botão verde do WhatsApp agora para atendimento imediato!';
+          errorMessage = 'Estamos com muitos acessos! Para não esperar, você pode clicar no botão verde do WhatsApp agora para um atendimento imediato e sem filas.';
         } else if (error?.message?.includes('API key')) {
           errorMessage = 'Erro de configuração. Por favor, verifique sua chave de acesso (API Key).';
         }
