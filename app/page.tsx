@@ -59,22 +59,49 @@ export default function Home() {
   return (
     <div className="flex flex-col h-[100dvh] bg-[#050507] text-slate-200 font-sans p-2 md:p-6 gap-4">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-5 bg-[#0f1115] border border-slate-800 rounded-2xl shrink-0 shadow-sm">
-        <div className="flex items-center gap-4">
+      <header className="flex items-center justify-between px-6 py-5 bg-[#0f1115] border border-slate-800 rounded-2xl shrink-0 shadow-sm relative overflow-hidden">
+        <div className="flex items-center gap-4 z-10">
           <motion.div 
-            className="relative flex items-center justify-center w-12 h-12 rounded-lg bg-orange-600 text-white shadow-inner overflow-hidden"
+            className="relative flex items-center justify-center w-12 h-12 rounded-lg bg-orange-600 text-white shadow-inner"
+            whileHover={{ scale: 1.05 }}
           >
             <Cctv className="w-6 h-6 absolute z-10" />
             <motion.div 
-              className="absolute inset-0 bg-white/20"
-              animate={{ scale: [1, 2, 1], opacity: [0.6, 0, 0.6] }}
-              transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+              className="absolute inset-0 bg-white/30"
+              animate={{ 
+                opacity: [0, 0.4, 0],
+                rotate: [0, 90, 180, 270, 360]
+              }}
+              transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
+            />
+            <motion.div 
+              className="absolute h-0.5 w-full bg-red-500 shadow-[0_0_8px_red]"
+              animate={{ top: ["0%", "100%", "0%"] }}
+              transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
             />
           </motion.div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-white">NDS CFTV Digital</h1>
-            <p className="text-xs text-slate-400 font-medium tracking-wider uppercase mt-0.5">Assistente Virtual</p>
+            <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+              NDS CFTV <span className="text-orange-500 font-black">DIGITAL</span>
+            </h1>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="flex h-2 w-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]" />
+              <p className="text-[10px] text-slate-400 font-bold tracking-wider uppercase">Sistema Operacional</p>
+            </div>
           </div>
+        </div>
+
+        <div className="hidden md:flex gap-4 items-center">
+          <div className="text-right">
+            <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest leading-none">Uptime</p>
+            <p className="text-sm font-mono text-white">99.9%</p>
+          </div>
+          <button 
+            onClick={() => alert("Para salvar no celular:\n1. Toque no ícone de compartilhar (Safari) ou menu de 3 pontos (Chrome)\n2. Selecione 'Adicionar à Tela de Início'\n\nPara integrar no seu site:\nUse um <iframe> direcionando para o link da Vercel.")}
+            className="px-3 py-1.5 border border-slate-800 rounded-lg text-[10px] font-bold text-slate-400 hover:bg-slate-800 transition-colors uppercase tracking-widest"
+          >
+            Guia Mobile/Web
+          </button>
         </div>
       </header>
 

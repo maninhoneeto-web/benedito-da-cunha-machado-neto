@@ -39,7 +39,7 @@ export function useCftvChat() {
         const ai = new GoogleGenAI({ apiKey });
         
         chatSessionRef.current = ai.chats.create({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-3-flash-preview',
           config: {
             systemInstruction: `Você é o assistente virtual oficial da NDS CFTV Digital, analista sênior em segurança eletrônica e elaboração de projetos.
 
