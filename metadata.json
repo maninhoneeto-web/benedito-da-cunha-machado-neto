@@ -1,6 +1,6 @@
 {
-  "name": "NDS CFTV Digital Assistente Chat Bot",
-  "description": "Assistente virtual oficial da NDS CFTV Digital para projetos de segurança eletrônica e CFTV.",
+  "name": "NDS Digital",
+  "description": "Assistente Virtual e Central de Atendimento da NDS CFTV Digital. Especialista em segurança eletrônica, CFTV, alarmes e redes.",
   "requestFramePermissions": [],
   "majorCapabilities": []
 }

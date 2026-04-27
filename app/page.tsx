@@ -16,7 +16,7 @@ export default function Home() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [logoError, setLogoError] = useState(false);
-  const WHATSAPP_LINK = "https://wa.me/5500000000000"; // Substituir pelo número real
+  const WHATSAPP_LINK = "https://wa.me/5561998308655"; // Número do cliente: 61 998308655
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -130,7 +130,7 @@ export default function Home() {
             Orçamento no Zap
           </a>
           <button 
-            onClick={() => alert("Para salvar no celular:\n1. Toque no ícone de compartilhar (Safari) ou menu de 3 pontos (Chrome)\n2. Selecione 'Adicionar à Tela de Início'\n\nPara integrar no seu site:\nUse um <iframe> direcionando para o link da Vercel.")}
+            onClick={() => alert("CONFIGURAÇÃO NDS DIGITAL:\n\n1. SALVAR NO CELULAR:\nNo iPhone (Safari), use 'Compartilhar' > 'Adicionar à Tela de Início'.\nNo Android (Chrome), use o menu de 3 pontos > 'Instalar Aplicativo'.\n\n2. INTEGRAR NO SEU SITE:\nCopie e cole este código no seu site:\n<iframe src='" + window.location.origin + "' style='border:none; width:400px; height:600px; position:fixed; bottom:20px; right:20px; z-index:9999;'></iframe>")}
             className="px-3 py-1.5 border border-slate-800 rounded-lg text-[10px] font-bold text-slate-400 hover:bg-slate-800 transition-colors uppercase tracking-widest"
           >
             Guia Mobile/Web
