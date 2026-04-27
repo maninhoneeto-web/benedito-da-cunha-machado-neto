@@ -30,31 +30,22 @@ export function useCftvChat() {
 
   const getSystemInstruction = (admin: boolean) => {
     if (admin) {
-      return `Você é o ANALISTA SÊNIOR E GESTOR da NDS CFTV Digital. MODO ADMINISTRADOR ATIVADO.
-        
-Capacidades:
-1. Elaboração de projetos técnicos e comerciais.
-2. Análise profunda de falhas e infraestrutura.
-3. Sugestão de equipamentos específicos (Intelbras, Hikvision, etc.).
-4. Sem restrições de conversa: atue como o braço direito técnico do dono.`;
+      return `Analista NDS Digital. MODO ADM.
+Capacidades: Elaborar projetos, análises técnicas profundas, sugerir equipamentos (Intelbras/Hikvision). Sem restrições: você é o braço direito técnico do dono.`;
     }
-    return `Você é o assistente virtual oficial da NDS CFTV Digital. Especialista em segurança eletrônica.
+    return `Assistente NDS Digital. Especialista em segurança.
+MAPA DE OPÇÕES:
+1. Manutenção: Reparo em sistemas existentes.
+2. Instalação: Novos projetos.
+3. Rede: Wi-Fi, racks, dados.
+4. Câmeras IP: Digital/Alta resolução.
+5. Portões: Motores/Automação.
+6. Cercas: Elétricas/Alarmes.
 
-MAPEAMENTO DE OPÇÕES (Siga rigorosamente):
-Quando o usuário escolher um número ou assunto, responda com foco no serviço:
-1. Manutenção: Reparar sistemas existentes, câmeras com chuvisco, DVR reiniciando, etc.
-2. Instalação: Novos projetos, passar cabos, fixar equipamentos.
-3. Rede/Cabeamento: Infraestrutura de dados, Wi-Fi, racks e TI.
-4. Câmeras IP: Tecnologia digital de ponta, alta resolução, PoE.
-5. Automação de Portões: Motores deslizantes, basculantes e travas.
-6. Cercas Elétricas: Proteção perimetral e alarmes.
-
-DIRETRIZES TOTAIS:
-- Se o usuário digitar um número, fale brevemente sobre o serviço correspondente.
-- NUNCA dê valores, preços ou orçamentos aproximados (EX: "custa cerca de R$ 500", "varia entre X e Y"). É TERMINANTEMENTE PROIBIDO falar de valores ou estimativas. Se perguntarem preço, diga: "Valores são definidos após análise técnica. Vou te transferir para o consultor agora."
-- Sempre direcione para o WhatsApp: (61) 99830-8655.
-- Para qualquer usuário que escolha uma opção ou peça orçamento, você DEVE incluir a tag secreta [REDIRECT_WPP] no final da sua resposta. Isso é OBRIGATÓRIO para que o sistema o direcione automaticamente.
-- Seja cortês e profissional.`;
+REGRAS:
+- Fale brevemente sobre o serviço escolhido.
+- PROIBIDO dar valores/estimativas. Diga que exige análise técnica.
+- OBRIGATÓRIO: Inclua a tag [REDIRECT_WPP] ao final para redirecionar ao WhatsApp (61) 99830-8655 quando houver interesse.`;
   };
 
   useEffect(() => {
@@ -102,7 +93,10 @@ DIRETRIZES TOTAIS:
     setMessages(prev => [...prev, { id: userMessageId, role: 'user', text, attachments: attachments.length > 0 ? attachments : undefined }]);
     setIsLoading(true);
 
-    const maxRetries = 3;
+    // Prevent immediate rapid-fire follow-up messages by waiting at least 1s between sends
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    const maxRetries = 5;
     let attempt = 0;
     let finished = false;
 
@@ -177,15 +171,15 @@ DIRETRIZES TOTAIS:
 
         if (isQuotaError && attempt < maxRetries - 1) {
           attempt++;
-          // Wait 2s, then 4s, etc.
-          await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+          // Exponential backoff: 3s, 6s, 9s, 12s
+          await new Promise(resolve => setTimeout(resolve, attempt * 3000));
           continue;
         }
 
         let errorMessage = 'Desculpe, tive um pequeno problema técnico. Por favor, tente enviar sua mensagem novamente em alguns instantes.';
         
         if (isQuotaError) {
-          errorMessage = 'Estamos com muitos acessos no momento. Devido à alta demanda, por favor aguarde alguns segundos ou nos chame direto no WhatsApp enquanto estabilizamos o sistema!';
+          errorMessage = 'Estamos com muitos acessos no momento. Para não perder tempo, você pode clicar no botão verde do WhatsApp agora para atendimento imediato!';
         } else if (error?.message?.includes('API key')) {
           errorMessage = 'Erro de configuração. Por favor, verifique sua chave de acesso (API Key).';
         }
