@@ -99,92 +99,110 @@ DIRETRIZES TOTAIS:
     const userMessageId = Date.now().toString();
     const modelMessageId = (Date.now() + 1).toString();
 
-    setMessages(prev => [...prev, { id: userMessageId, role: 'user', text, attachments }]);
+    setMessages(prev => [...prev, { id: userMessageId, role: 'user', text, attachments: attachments.length > 0 ? attachments : undefined }]);
     setIsLoading(true);
 
-    try {
-      if (!chatSessionRef.current) {
-        throw new Error("Chat session is not initialized. Please check your API key.");
-      }
+    const maxRetries = 3;
+    let attempt = 0;
+    let finished = false;
 
-      // Prepare the message parts for the SDK
-      let messageContent: any = text;
-      
-      if (attachments.length > 0) {
-        messageContent = [];
-        if (text) messageContent.push(text);
-        attachments.forEach(att => {
-          messageContent.push({ inlineData: { data: att.data, mimeType: att.mimeType } });
-        });
-      }
-
-      const stream = await chatSessionRef.current.sendMessageStream({ message: messageContent });
-      
-      setMessages(prev => [
-        ...prev,
-        { id: modelMessageId, role: 'model', text: '', isStreaming: true }
-      ]);
-
-      let fullText = '';
-      for await (const chunk of stream) {
-        fullText += chunk.text || '';
-        setMessages(prev => 
-          prev.map(msg => 
-            msg.id === modelMessageId 
-              ? { ...msg, text: fullText }
-              : msg
-          )
-        );
-      }
-
-      let finalCleanText = fullText;
-      if (fullText.includes('[REDIRECT_WPP]')) {
-        finalCleanText = fullText.replace('[REDIRECT_WPP]', '').trim();
-        setMessages(prev => 
-          prev.map(msg => 
-            msg.id === modelMessageId 
-              ? { ...msg, text: finalCleanText, isStreaming: false }
-              : msg
-          )
-        );
-        
-        // Wait 2 seconds then redirect automatically
-        setTimeout(() => {
-          window.location.href = "https://wa.me/5561998308655";
-        }, 2000);
-      } else {
-        setMessages(prev => 
-          prev.map(msg => 
-            msg.id === modelMessageId 
-              ? { ...msg, isStreaming: false }
-              : msg
-          )
-        );
-      }
-
-    } catch (error: any) {
-      console.error("Error sending message:", error);
-      
-      let errorMessage = 'Desculpe, tive um pequeno problema técnico. Por favor, tente enviar sua mensagem novamente em alguns instantes.';
-      
-      if (error?.message?.toLowerCase().includes('demand') || error?.message?.includes('429') || error?.status === 429) {
-        errorMessage = 'Estamos com muitos acessos no momento. Por favor, aguarde uns segundos e tente novamente ou nos chame direto no WhatsApp!';
-      } else if (error?.message?.includes('API key')) {
-        errorMessage = 'Erro de configuração. Por favor, verifique sua chave de acesso (API Key).';
-      }
-
-      setMessages(prev => [
-        ...prev,
-        { 
-          id: Date.now().toString(), 
-          role: 'model', 
-          text: errorMessage, 
-          isStreaming: false 
+    while (attempt < maxRetries && !finished) {
+      try {
+        if (!chatSessionRef.current) {
+          throw new Error("Chat session is not initialized. Please check your API key.");
         }
-      ]);
-    } finally {
-      setIsLoading(false);
+
+        // Prepare the message parts for the SDK
+        let messageContent: any = text;
+        
+        if (attachments.length > 0) {
+          messageContent = [];
+          if (text) messageContent.push(text);
+          attachments.forEach(att => {
+            messageContent.push({ inlineData: { data: att.data, mimeType: att.mimeType } });
+          });
+        }
+
+        const stream = await chatSessionRef.current.sendMessageStream({ message: messageContent });
+        
+        setMessages(prev => [
+          ...prev,
+          { id: modelMessageId, role: 'model', text: '', isStreaming: true }
+        ]);
+
+        let fullText = '';
+        for await (const chunk of stream) {
+          fullText += chunk.text || '';
+          setMessages(prev => 
+            prev.map(msg => 
+              msg.id === modelMessageId 
+                ? { ...msg, text: fullText }
+                : msg
+            )
+          );
+        }
+
+        let finalCleanText = fullText;
+        if (fullText.includes('[REDIRECT_WPP]')) {
+          finalCleanText = fullText.replace('[REDIRECT_WPP]', '').trim();
+          setMessages(prev => 
+            prev.map(msg => 
+              msg.id === modelMessageId 
+                ? { ...msg, text: finalCleanText, isStreaming: false }
+                : msg
+            )
+          );
+          
+          // Wait 2 seconds then redirect automatically
+          setTimeout(() => {
+            window.location.href = "https://wa.me/5561998308655";
+          }, 2000);
+        } else {
+          setMessages(prev => 
+            prev.map(msg => 
+              msg.id === modelMessageId 
+                ? { ...msg, isStreaming: false }
+                : msg
+            )
+          );
+        }
+        finished = true;
+
+      } catch (error: any) {
+        console.error(`Attempt ${attempt + 1} failed:`, error);
+        
+        const isQuotaError = error?.message?.toLowerCase().includes('demand') || 
+                            error?.message?.includes('429') || 
+                            error?.status === 429;
+
+        if (isQuotaError && attempt < maxRetries - 1) {
+          attempt++;
+          // Wait 2s, then 4s, etc.
+          await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+          continue;
+        }
+
+        let errorMessage = 'Desculpe, tive um pequeno problema técnico. Por favor, tente enviar sua mensagem novamente em alguns instantes.';
+        
+        if (isQuotaError) {
+          errorMessage = 'Estamos com muitos acessos no momento. Devido à alta demanda, por favor aguarde alguns segundos ou nos chame direto no WhatsApp enquanto estabilizamos o sistema!';
+        } else if (error?.message?.includes('API key')) {
+          errorMessage = 'Erro de configuração. Por favor, verifique sua chave de acesso (API Key).';
+        }
+
+        setMessages(prev => [
+          ...prev,
+          { 
+            id: Date.now().toString(), 
+            role: 'model', 
+            text: errorMessage, 
+            isStreaming: false 
+          }
+        ]);
+        finished = true;
+      }
     }
+    setIsLoading(false);
   };
 
   return {
