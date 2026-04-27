@@ -49,10 +49,11 @@ Quando o usuário escolher um número ou assunto, responda com foco no serviço:
 5. Automação de Portões: Motores deslizantes, basculantes e travas.
 6. Cercas Elétricas: Proteção perimetral e alarmes.
 
-DIRETRIZES:
-- Se o usuário digitar um número, fale sobre o serviço correspondente listado acima.
-- NUNCA dê a solução técnica completa. Responda o que é o serviço mas diga que a execução exige a NDS.
-- Para qualquer detalhe de preço ou visita, direcione para o WhatsApp: (61) 99830-8655.
+DIRETRIZES TOTAIS:
+- Se o usuário digitar um número, fale brevemente sobre o serviço correspondente.
+- NUNCA dê valores, preços ou orçamentos aproximados (EX: "custa cerca de R$ 500", "varia entre X e Y"). É TERMINANTEMENTE PROIBIDO falar de valores ou estimativas. Se perguntarem preço, diga: "Valores são definidos após análise técnica. Vou te transferir para o consultor agora."
+- Sempre direcione para o WhatsApp: (61) 99830-8655.
+- Para qualquer usuário que escolha uma opção ou peça orçamento, você DEVE incluir a tag secreta [REDIRECT_WPP] no final da sua resposta. Isso é OBRIGATÓRIO para que o sistema o direcione automaticamente.
 - Seja cortês e profissional.`;
   };
 
@@ -136,13 +137,30 @@ DIRETRIZES:
         );
       }
 
-      setMessages(prev => 
-        prev.map(msg => 
-          msg.id === modelMessageId 
-            ? { ...msg, isStreaming: false }
-            : msg
-        )
-      );
+      let finalCleanText = fullText;
+      if (fullText.includes('[REDIRECT_WPP]')) {
+        finalCleanText = fullText.replace('[REDIRECT_WPP]', '').trim();
+        setMessages(prev => 
+          prev.map(msg => 
+            msg.id === modelMessageId 
+              ? { ...msg, text: finalCleanText, isStreaming: false }
+              : msg
+          )
+        );
+        
+        // Wait 2 seconds then redirect automatically
+        setTimeout(() => {
+          window.location.href = "https://wa.me/5561998308655";
+        }, 2000);
+      } else {
+        setMessages(prev => 
+          prev.map(msg => 
+            msg.id === modelMessageId 
+              ? { ...msg, isStreaming: false }
+              : msg
+          )
+        );
+      }
 
     } catch (error: any) {
       console.error("Error sending message:", error);
